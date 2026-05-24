@@ -16,8 +16,26 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('tracker/', include('tracker.urls')), # To przekierowuje do Twojego pliku urls.py
+    path('tracker/', include('tracker.urls')), # files urls.py
+    path("accounts/", include("django.contrib.auth.urls")), #
+
+]
+
+def home(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    return redirect("/tracker/entries/")
+
+urlpatterns = [
+    path("", home),  # <- STRONA STARTOWA
+    path("admin/", admin.site.urls),
+    path("tracker/", include("tracker.urls")),
+
+    # Django auth system
+    path("accounts/", include("django.contrib.auth.urls")),
 ]

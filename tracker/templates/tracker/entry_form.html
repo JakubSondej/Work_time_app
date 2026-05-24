@@ -1,0 +1,13 @@
+<h1>Dodaj wpis czasu pracy</h1>
+<a href="/tracker/entries/new/">➕ Dodaj wpis</a>
+<hr>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Zapisz</button>
+</form>
+
+<br>
+<a href="/tracker/entries/">Powrót</a>
+
