@@ -1,0 +1,12 @@
+<h1>Work Entries</h1>
+
+<ul>
+    {% for entry in entries %}
+        <li>
+            {{ entry.user.username }} |
+            {{ entry.date }} |
+            {{ entry.start_time }} - {{ entry.end_time }} |
+            {{ entry.break_minutes }} min
+        </li>
+    {% endfor %}
+</ul>
