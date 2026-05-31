@@ -70,6 +70,10 @@
         <h2>Dni pracy</h2>
         <a href="{% url 'monthly_summary' %}" class="btn btn-outline-dark">Podsumowanie miesięczne</a>
         <a href="{% url 'work_day_create' %}" class="btn btn-primary">+ Dodaj dzień pracy</a>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger">Wyloguj</button>
+        </form>
     </div>
 
     <table class="table table-bordered table-striped bg-white">

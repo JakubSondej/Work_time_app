@@ -11,6 +11,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Podsumowanie miesięczne</h2>
         <a href="{% url 'work_day_list' %}" class="btn btn-secondary">Powrót do dni pracy</a>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger">Wyloguj</button>
+        </form>
     </div>
 
     <form method="get" class="card p-3 mb-4">
