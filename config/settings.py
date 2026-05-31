@@ -119,5 +119,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 LOGIN_REDIRECT_URL = "/"
-LOGIN_REDIRECT_URL = "/tracker/entries/"
+# LOGIN_REDIRECT_URL = "/tracker/entries/"
+# OGOUT_REDIRECT_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "/tracker/work-days/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"

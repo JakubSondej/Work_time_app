@@ -1,12 +1,52 @@
-<h1>Work Entries</h1>
+<!-- tracker/templates/tracker/entry_list.html -->
 
-<ul>
-    {% for entry in entries %}
-        <li>
-            {{ entry.user.username }} |
-            {{ entry.date }} |
-            {{ entry.start_time }} - {{ entry.end_time }} |
-            {{ entry.break_minutes }} min
-        </li>
-    {% endfor %}
-</ul>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Work Entries</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Work Entries</h2>
+
+        <a class="btn btn-primary" href="{% url 'entry_create' %}">
+            + Add Work Entry
+        </a>
+    </div>
+
+    <table class="table table-striped table-bordered bg-white">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Break</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for entry in entries %}
+            <tr>
+                <td>{{ entry.user }}</td>
+                <td>{{ entry.date }}</td>
+                <td>{{ entry.start_time }} - {{ entry.end_time }}</td>
+                <td>{{ entry.break_minutes }} min</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No entries yet</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>
