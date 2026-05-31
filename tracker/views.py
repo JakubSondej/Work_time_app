@@ -1,43 +1,3 @@
-# from django.shortcuts import render
-# from .models import WorkEntry
-# from .forms import WorkEntryForm
-# from django.shortcuts import redirect
-
-# from django.contrib.auth.decorators import login_required
-
-# # Create your views here.
-# # from .models import WorkEntry
-
-# # def work_entry_list(request):
-# #     # Korzystamy z naszego managera, który sam decyduje co pokazać
-# #     entries = WorkEntry.objects.for_user(request.user)
-# #     return render(request, 'tracker/entry_list.html', {'entries': entries})
-# @login_required
-# def work_entry_list(request):
-
-#     user = request.user
-#     if user.groups.filter(name="Manager").exists() or user.is_superuser:
-#         entries = WorkEntry.objects.all()
-#     else:
-#         entries = WorkEntry.objects.filter(user=user)
-
-#     return render(request, "tracker/entry_list.html", {"entries": entries})
-
-# @login_required
-# def work_entry_create(request):
-#     if request.method == "POST":
-#         form = WorkEntryForm(request.POST)
-#         if form.is_valid():
-#             entry = form.save(commit=False)
-#             entry.user = request.user
-#             entry.save()
-#             return redirect("entries")
-#     else:
-#         form = WorkEntryForm()
-
-#     return render(request, "tracker/entry_form.html", {"form": form})
-
-
 import profile
 
 from django.contrib.auth.decorators import login_required
@@ -45,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.shortcuts import render, redirect, get_object_or_404
 from datetime import date
 from decimal import Decimal
+from django.contrib.auth.models import User
 
 from .models import WorkDay
 from .forms import WorkDayForm, WorkPeriodFormSet
@@ -60,7 +21,6 @@ def work_day_list(request):
         days = WorkDay.objects.filter(user=user)
 
     return render(request, "tracker/work_day_list.html", {"days": days})
-
 
 @login_required
 def work_day_create(request):
@@ -112,7 +72,6 @@ def work_day_update(request, pk):
         "formset": formset,
     })
 
-
 @login_required
 def work_day_delete(request, pk):
     work_day = get_object_or_404(WorkDay, pk=pk)
@@ -127,8 +86,6 @@ def work_day_delete(request, pk):
     return render(request, "tracker/work_day_confirm_delete.html", {
         "work_day": work_day
     })  
-
-
 
 @login_required
 def monthly_summary(request):
@@ -169,3 +126,96 @@ def monthly_summary(request):
     }
 
     return render(request, "tracker/monthly_summary.html", context)
+
+
+def is_manager(user):
+    return user.groups.filter(name="Manager").exists() or user.is_superuser
+
+# @login_required
+# def manager_dashboard(request):
+#     if not is_manager(request.user):
+#         return redirect("work_day_list")
+
+#     today = date.today()
+#     year = int(request.GET.get("year", today.year))
+#     month = int(request.GET.get("month", today.month))
+
+#     days = WorkDay.objects.filter(
+#         date__year=year,
+#         date__month=month
+#     ).select_related("user").prefetch_related("periods")
+
+#     total_minutes = sum(day.total_minutes() for day in days)
+
+#     context = {
+#         "days": days,
+#         "year": year,
+#         "month": month,
+#         "total_minutes": total_minutes,
+#         "total_hours": round(total_minutes / 60, 2),
+#     }
+
+#     return render(request, "tracker/manager_dashboard.html", context)
+
+@login_required
+def manager_dashboard(request):
+    if not is_manager(request.user):
+        return redirect("work_day_list")
+
+    today = date.today()
+    year = int(request.GET.get("year", today.year))
+    month = int(request.GET.get("month", today.month))
+    employee_id = request.GET.get("employee")
+
+    days = WorkDay.objects.filter(
+        date__year=year,
+        date__month=month
+    ).select_related("user").prefetch_related("periods")
+
+    if employee_id:
+        days = days.filter(user_id=employee_id)
+
+    employees = User.objects.filter(
+        workday__isnull=False
+    ).distinct().order_by("username")
+
+    total_minutes = sum(day.total_minutes() for day in days)
+
+    context = {
+        "days": days,
+        "employees": employees,
+        "selected_employee": employee_id,
+        "year": year,
+        "month": month,
+        "total_minutes": total_minutes,
+        "total_hours": round(total_minutes / 60, 2),
+    }
+
+    return render(request, "tracker/manager_dashboard.html", context)
+
+@login_required
+def approve_work_day(request, pk):
+    if not is_manager(request.user):
+        return redirect("work_day_list")
+
+    work_day = get_object_or_404(WorkDay, pk=pk)
+
+    if request.method == "POST":
+        work_day.approved = True
+        work_day.save()
+
+    return redirect("manager_dashboard")
+
+
+@login_required
+def unapprove_work_day(request, pk):
+    if not is_manager(request.user):
+        return redirect("work_day_list")
+
+    work_day = get_object_or_404(WorkDay, pk=pk)
+
+    if request.method == "POST":
+        work_day.approved = False
+        work_day.save()
+
+    return redirect("manager_dashboard")
