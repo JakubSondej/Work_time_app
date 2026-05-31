@@ -76,10 +76,19 @@ class WorkPeriod(models.Model):
         return f"{self.start_time} - {self.end_time}"
 
     def duration_minutes(self):
-        start = datetime.combine(datetime.today(), self.start_time)
-        end = datetime.combine(datetime.today(), self.end_time)
+        start = datetime.combine(self.work_day.date, self.start_time)
+        end = datetime.combine(self.work_day.date, self.end_time)
+
+        if end < start:
+            end = end.replace(day=end.day + 1)
+
         diff = end - start
-        return int(diff.total_seconds() // 60)
+        minutes = int(diff.total_seconds() // 60)
+
+        if minutes < 0:
+            raise ValueError(f"End time ({self.end_time}) must be after start time ({self.start_time})")
+
+        return minutes
 
 
 # Stary model zostawiamy tymczasowo, żeby nie mieszać migracji.
