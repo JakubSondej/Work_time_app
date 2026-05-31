@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% comment %} <!DOCTYPE html>
 <html>
 <head>
     <title>Dni pracy</title>
@@ -45,6 +45,69 @@
         {% empty %}
             <tr>
                 <td colspan="5" class="text-center">Brak wpisów.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html> {% endcomment %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dni pracy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Dni pracy</h2>
+        <a href="{% url 'work_day_create' %}" class="btn btn-primary">+ Dodaj dzień pracy</a>
+    </div>
+
+    <table class="table table-bordered table-striped bg-white">
+        <thead>
+            <tr>
+                <th>Pracownik</th>
+                <th>Data</th>
+                <th>Przedziały</th>
+                <th>Razem</th>
+                <th>Status</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for day in days %}
+            <tr>
+                <td>{{ day.user.username }}</td>
+                <td>{{ day.date }}</td>
+                <td>
+                    {% for period in day.periods.all %}
+                        <div>{{ period.start_time|time:"H:i" }} - {{ period.end_time|time:"H:i" }}</div>
+                    {% endfor %}
+                </td>
+                <td>{{ day.total_hours_display }}</td>
+                <td>
+                    {% if day.approved %}
+                        Zatwierdzone
+                    {% else %}
+                        Oczekuje
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'work_day_update' day.id %}" class="btn btn-sm btn-warning">Edytuj</a>
+                    <a href="{% url 'work_day_delete' day.id %}" class="btn btn-sm btn-danger">Usuń</a>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">Brak wpisów.</td>
             </tr>
         {% endfor %}
         </tbody>

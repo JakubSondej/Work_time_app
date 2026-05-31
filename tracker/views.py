@@ -40,6 +40,7 @@
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from .models import WorkDay
 from .forms import WorkDayForm, WorkPeriodFormSet
@@ -81,4 +82,44 @@ def work_day_create(request):
     return render(request, "tracker/work_day_form.html", {
         "form": form,
         "formset": formset,
+    })
+
+@login_required
+def work_day_update(request, pk):
+    work_day = get_object_or_404(WorkDay, pk=pk)
+
+    if work_day.user != request.user and not request.user.groups.filter(name="Manager").exists() and not request.user.is_superuser:
+        return redirect("work_day_list")
+
+    if request.method == "POST":
+        form = WorkDayForm(request.POST, instance=work_day)
+        formset = WorkPeriodFormSet(request.POST, instance=work_day)
+
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+            return redirect("work_day_list")
+    else:
+        form = WorkDayForm(instance=work_day)
+        formset = WorkPeriodFormSet(instance=work_day)
+
+    return render(request, "tracker/work_day_form.html", {
+        "form": form,
+        "formset": formset,
+    })
+
+
+@login_required
+def work_day_delete(request, pk):
+    work_day = get_object_or_404(WorkDay, pk=pk)
+
+    if work_day.user != request.user and not request.user.groups.filter(name="Manager").exists() and not request.user.is_superuser:
+        return redirect("work_day_list")
+
+    if request.method == "POST":
+        work_day.delete()
+        return redirect("work_day_list")
+
+    return render(request, "tracker/work_day_confirm_delete.html", {
+        "work_day": work_day
     })
