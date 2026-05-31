@@ -9,7 +9,8 @@ from django.contrib.auth.models import User
 
 from .models import WorkDay
 from .forms import WorkDayForm, WorkPeriodFormSet
-
+import csv
+from django.http import HttpResponse
 
 @login_required
 def work_day_list(request):
@@ -51,6 +52,9 @@ def work_day_create(request):
 @login_required
 def work_day_update(request, pk):
     work_day = get_object_or_404(WorkDay, pk=pk)
+    
+    if work_day.approved and not is_manager(request.user):
+        return redirect("work_day_list")
 
     if work_day.user != request.user and not request.user.groups.filter(name="Manager").exists() and not request.user.is_superuser:
         return redirect("work_day_list")
@@ -75,6 +79,9 @@ def work_day_update(request, pk):
 @login_required
 def work_day_delete(request, pk):
     work_day = get_object_or_404(WorkDay, pk=pk)
+
+    if work_day.approved and not is_manager(request.user):
+        return redirect("work_day_list")
 
     if work_day.user != request.user and not request.user.groups.filter(name="Manager").exists() and not request.user.is_superuser:
         return redirect("work_day_list")
@@ -219,3 +226,132 @@ def unapprove_work_day(request, pk):
         work_day.save()
 
     return redirect("manager_dashboard")
+
+
+def get_hourly_rate(user):
+    profile = getattr(user, "userprofile", None)
+
+    if profile:
+        return profile.hourly_rate
+
+    return Decimal("30.00")
+
+@login_required
+def export_employee_report_csv(request):
+    user = request.user
+
+    today = date.today()
+    year = int(request.GET.get("year", today.year))
+    month = int(request.GET.get("month", today.month))
+
+    days = WorkDay.objects.filter(
+        user=user,
+        date__year=year,
+        date__month=month
+    ).prefetch_related("periods")
+
+    hourly_rate = get_hourly_rate(user)
+    total_minutes = sum(day.total_minutes() for day in days)
+    total_hours = Decimal(total_minutes) / Decimal(60)
+    salary = total_hours * hourly_rate
+
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="raport_{user.username}_{year}_{month}.csv"'
+
+    response.write("\ufeff")
+
+    writer = csv.writer(response, delimiter=";")
+
+    writer.writerow(["Raport czasu pracy"])
+    writer.writerow(["Pracownik", user.username])
+    writer.writerow(["Miesiac", month])
+    writer.writerow(["Rok", year])
+    writer.writerow(["Stawka godzinowa", f"{hourly_rate} zl/h"])
+    writer.writerow(["Lacznie godzin", f"{round(total_hours, 2)}"])
+    writer.writerow(["Wynagrodzenie", f"{round(salary, 2)} zl"])
+    writer.writerow([])
+
+    writer.writerow(["Data", "Przedzialy", "Razem minut", "Razem godzin", "Status"])
+
+    for day in days:
+        periods = ", ".join(
+            f"{p.start_time.strftime('%H:%M')}-{p.end_time.strftime('%H:%M')}"
+            for p in day.periods.all()
+        )
+
+        day_minutes = day.total_minutes()
+        day_hours = Decimal(day_minutes) / Decimal(60)
+
+        writer.writerow([
+            day.date,
+            periods,
+            day_minutes,
+            round(day_hours, 2),
+            "Zatwierdzone" if day.approved else "Oczekuje",
+        ])
+
+    return response
+
+@login_required
+def export_manager_report_csv(request):
+    if not is_manager(request.user):
+        return redirect("work_day_list")
+
+    today = date.today()
+    year = int(request.GET.get("year", today.year))
+    month = int(request.GET.get("month", today.month))
+    employee_id = request.GET.get("employee")
+
+    days = WorkDay.objects.filter(
+        date__year=year,
+        date__month=month
+    ).select_related("user").prefetch_related("periods")
+
+    if employee_id:
+        days = days.filter(user_id=employee_id)
+
+    total_minutes = sum(day.total_minutes() for day in days)
+    total_hours = Decimal(total_minutes) / Decimal(60)
+
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="raport_szefa_{year}_{month}.csv"'
+
+    response.write("\ufeff")
+
+    writer = csv.writer(response, delimiter=";")
+
+    writer.writerow(["Raport czasu pracy - panel szefa"])
+    writer.writerow(["Miesiac", month])
+    writer.writerow(["Rok", year])
+    writer.writerow(["Lacznie godzin", f"{round(total_hours, 2)}"])
+    writer.writerow([])
+
+    writer.writerow([
+        "Pracownik",
+        "Data",
+        "Przedzialy",
+        "Razem minut",
+        "Razem godzin",
+        "Status"
+    ])
+
+    for day in days:
+        periods = ", ".join(
+            f"{p.start_time.strftime('%H:%M')}-{p.end_time.strftime('%H:%M')}"
+            for p in day.periods.all()
+        )
+
+        day_minutes = day.total_minutes()
+        day_hours = Decimal(day_minutes) / Decimal(60)
+
+        writer.writerow([
+            day.user.username,
+            day.date,
+            periods,
+            day_minutes,
+            round(day_hours, 2),
+            "Zatwierdzone" if day.approved else "Oczekuje",
+        ])
+
+    return response
+

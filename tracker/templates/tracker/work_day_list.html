@@ -109,8 +109,12 @@
                     {% endif %}
                 </td>
                 <td>
-                    <a href="{% url 'work_day_update' day.id %}" class="btn btn-sm btn-warning">Edytuj</a>
-                    <a href="{% url 'work_day_delete' day.id %}" class="btn btn-sm btn-danger">Usuń</a>
+                    {% if day.approved %}
+                        <span class="text-muted">Zablokowane</span>
+                    {% else %}
+                        <a href="{% url 'work_day_update' day.id %}" class="btn btn-sm btn-warning">Edytuj</a>
+                        <a href="{% url 'work_day_delete' day.id %}" class="btn btn-sm btn-danger">Usuń</a>
+                    {% endif %}               
                 </td>
             </tr>
         {% empty %}

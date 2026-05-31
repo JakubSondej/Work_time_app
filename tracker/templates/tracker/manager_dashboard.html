@@ -14,6 +14,10 @@
         <div class="d-flex gap-2">
             <a href="{% url 'work_day_list' %}" class="btn btn-outline-secondary">Dni pracy</a>
 
+            <a href="{% url 'export_manager_report_csv' %}?month={{ month }}&year={{ year }}{% if selected_employee %}&employee={{ selected_employee }}{% endif %}" class="btn btn-success">
+                Generuj raport CSV
+            </a>
+            
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-danger">Wyloguj</button>
@@ -46,7 +50,7 @@
                 <input type="number" min="1" max="12" name="month" value="{{ month }}" class="form-control">
             </div>
 
-            <div class="col-md-3">
+              <div class="col-md-3">
                 <label class="form-label">Rok</label>
                 <input type="number" name="year" value="{{ year }}" class="form-control">
             </div>
