@@ -16,8 +16,7 @@
 #     search_fields = ('user__username', 'description')
 
 from django.contrib import admin
-from .models import WorkEntry, WorkDay, WorkPeriod
-
+from .models import WorkEntry, WorkDay, WorkPeriod, UserProfile
 
 class WorkPeriodInline(admin.TabularInline):
     model = WorkPeriod
@@ -40,3 +39,7 @@ class WorkPeriodAdmin(admin.ModelAdmin):
 @admin.register(WorkEntry)
 class WorkEntryAdmin(admin.ModelAdmin):
     list_display = ("user", "date", "start_time", "end_time", "break_minutes", "approved")
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "hourly_rate")

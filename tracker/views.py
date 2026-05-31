@@ -38,9 +38,13 @@
 #     return render(request, "tracker/entry_form.html", {"form": form})
 
 
+import profile
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.shortcuts import render, redirect, get_object_or_404
+from datetime import date
+from decimal import Decimal
 
 from .models import WorkDay
 from .forms import WorkDayForm, WorkPeriodFormSet
@@ -122,4 +126,46 @@ def work_day_delete(request, pk):
 
     return render(request, "tracker/work_day_confirm_delete.html", {
         "work_day": work_day
-    })
+    })  
+
+
+
+@login_required
+def monthly_summary(request):
+    user = request.user
+
+    today = date.today()
+
+    year = int(request.GET.get("year", today.year))
+    month = int(request.GET.get("month", today.month))
+
+    #hourly_rate = Decimal("30.00")
+    profile = getattr(user, "userprofile", None)
+
+    if profile:
+        hourly_rate = profile.hourly_rate
+    else:
+        hourly_rate = Decimal("30.00")
+        
+
+
+    if user.groups.filter(name="Manager").exists() or user.is_superuser:
+        days = WorkDay.objects.filter(date__year=year, date__month=month)
+    else:
+        days = WorkDay.objects.filter(user=user, date__year=year, date__month=month)
+
+    total_minutes = sum(day.total_minutes() for day in days)
+    total_hours = Decimal(total_minutes) / Decimal(60)
+    salary = total_hours * hourly_rate
+
+    context = {
+        "days": days,
+        "year": year,
+        "month": month,
+        "total_minutes": total_minutes,
+        "total_hours": round(total_hours, 2),
+        "hourly_rate": hourly_rate,
+        "salary": round(salary, 2),
+    }
+
+    return render(request, "tracker/monthly_summary.html", context)
