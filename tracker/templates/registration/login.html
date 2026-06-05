@@ -1,66 +1,141 @@
 <!DOCTYPE html>
-<html>
+<html lang="pl">
 <head>
-    <title>System ewidencji czasu pracy</title>
+    <meta charset="UTF-8">
+    <title>System Ewidencji Czasu Pracy - Logowanie</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        header {
+            margin-top: 40px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2rem;
+            color: #2c3e50;
+        }
+        main {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 360px;
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #34495e;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        input[type="text"],
+        input[type="password"] {
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #2980b9;
+        }
+        button {
+            padding: 12px;
+            background-color: #2980b9;
+            color: white;
+            font-weight: 700;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1c5980;
+        }
+        .test-account {
+            margin-top: 30px;
+            background: #ecf0f1;
+            padding: 15px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+        .test-account strong {
+            font-weight: 700;
+        }
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            font-size: 0.9rem;
+            text-align: center;
+            color: #7f8c8d;
+        }
+        ul {
+            margin-top: 15px;
+            padding-left: 20px;
+        }
+    </style>
 </head>
 <body>
 
-<h2>Logowanie</h2>
+<header>
+    <h1>System Ewidencji Czasu Pracy</h1>
+    <p>Aplikacja do rejestrowania czasu pracy, zatwierdzania wpisów oraz generowania raportów.</p>
+</header>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Zaloguj</button>
-</form>
+<main>
+    <h2>Logowanie</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label for="id_username">Nazwa użytkownika:</label>
+        {{ form.username }}
+        <label for="id_password">Hasło:</label>
+        {{ form.password }}
+        <button type="submit">Zaloguj</button>
+    </form>
 
-<hr>
+    <div class="test-account">
+        <h3>Konto testowe dla prowadzącego</h3>
+        <p>Login: <strong>prowadzacy</strong><br>
+           Hasło: <strong>39z49fwfj0n!bs</strong><br>
+           Rola: <strong>Manager</strong></p>
+    </div>
 
-<h3>Konto testowe dla prowadzącego</h3>
+    <hr>
 
-<p>
-    Login: <strong>prowadzacy</strong><br>
-    Hasło: <strong>39z49fwfj0n!bs</strong><br>
-    Rola: <strong>Manager</strong>
-</p>
+    <section>
+        <h3>Funkcje systemu</h3>
+        <ul>
+            <li>Pracownik – dodawanie godzin pracy</li>
+            <li>Manager – zatwierdzanie wpisów i raporty</li>
+            <li>Administrator – zarządzanie użytkownikami</li>
+        </ul>
+    </section>
+</main>
+
+<footer>
+    &copy; 2026 System Ewidencji Czasu Pracy
+</footer>
 
 </body>
 </html>
-
-
-<h1>System Ewidencji Czasu Pracy</h1>
-
-<p>
-Aplikacja umożliwia rejestrowanie czasu pracy pracowników,
-zatwierdzanie wpisów przez przełożonego oraz generowanie raportów miesięcznych.
-</p>
-
-<ul>
-    <li>Pracownik – dodawanie godzin pracy</li>
-    <li>Manager – zatwierdzanie wpisów i raporty</li>
-    <li>Administrator – zarządzanie użytkownikami</li>
-</ul>
-
-<hr>
-
-
-
-
-
-
-{% comment %} <!DOCTYPE html>
-<html>
-<head>
-    <title>Login</title>
-</head>
-<body>
-
-<h2>Logowanie</h2>
-
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Zaloguj</button>
-</form>
-
-</body>
-</html> {% endcomment %}
