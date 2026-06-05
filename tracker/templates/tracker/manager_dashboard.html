@@ -17,6 +17,11 @@
             <a href="{% url 'export_manager_report_csv' %}?month={{ month }}&year={{ year }}{% if selected_employee %}&employee={{ selected_employee }}{% endif %}" class="btn btn-success">
                 Generuj raport CSV
             </a>
+
+            <a href="{% url 'export_manager_report_xlsx' %}?month={{ month }}&year={{ year }}{% if selected_employee %}&employee={{ selected_employee }}{% endif %}"
+            class="btn btn-success">
+                Generuj raport Excel
+            </a>
             
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}

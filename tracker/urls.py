@@ -20,4 +20,8 @@ urlpatterns = [
     
     path("entries/", lambda request: redirect("work_day_list")),
     path("entries/new/", lambda request: redirect("work_day_create")),
-    ]
+
+    #Exel reports
+    path("reports/employee/xlsx/", views.export_employee_report_xlsx, name="export_employee_report_xlsx"),
+    path("reports/manager/xlsx/", views.export_manager_report_xlsx, name="export_manager_report_xlsx"),
+]

@@ -31,6 +31,11 @@
                 Generuj raport CSV
             </a>
 
+            <a href="{% url 'export_employee_report_xlsx' %}?month={{ month }}&year={{ year }}"
+            class="btn btn-success">
+                Generuj raport Excel
+            </a>
+
             <a href="{% url 'work_day_list' %}"
             class="btn btn-secondary">
                 Powrót do dni pracy
