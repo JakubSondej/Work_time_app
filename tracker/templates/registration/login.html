@@ -1,6 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>System ewidencji czasu pracy</title>
+</head>
+<body>
+
+<h2>Logowanie</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Zaloguj</button>
+</form>
+
+<hr>
+
+<h3>Konto testowe dla prowadzącego</h3>
+
+<p>
+    Login: <strong>prowadzacy</strong><br>
+    Hasło: <strong>test123</strong><br>
+    Rola: <strong>Manager</strong>
+</p>
+
+</body>
+</html>
+
+
+<h1>System Ewidencji Czasu Pracy</h1>
+
+<p>
+Aplikacja umożliwia rejestrowanie czasu pracy pracowników,
+zatwierdzanie wpisów przez przełożonego oraz generowanie raportów miesięcznych.
+</p>
+
+<ul>
+    <li>Pracownik – dodawanie godzin pracy</li>
+    <li>Manager – zatwierdzanie wpisów i raporty</li>
+    <li>Administrator – zarządzanie użytkownikami</li>
+</ul>
+
+<hr>
+
+
+
+
+
+
+{% comment %} <!DOCTYPE html>
+<html>
+<head>
     <title>Login</title>
 </head>
 <body>
@@ -14,4 +63,4 @@
 </form>
 
 </body>
-</html>
+</html> {% endcomment %}
