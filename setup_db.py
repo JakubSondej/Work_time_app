@@ -1,54 +1,51 @@
 import os
 import django
-from django.contrib.auth.models import User, Group
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
-# Utwórz grupę Manager jeśli nie istnieje
-manager_group, created = Group.objects.get_or_create(name='Manager')
-if created:
-    print(f"✅ Grupa 'Manager' utworzona")
-else:
-    print(f"✅ Grupa 'Manager' już istnieje")
+from django.contrib.auth.models import User, Group
+from tracker.models import UserProfile
 
-# Utwórz superusera jeśli nie istnieje
-if not User.objects.filter(username='admin').exists():
-    User.objects.create_superuser(
-        username='admin',
-        email='admin@example.com',
-        password='admin123'
-    )
-    print("✅ Superuser 'admin' / 'admin123' utworzony")
-else:
-    print("✅ Superuser 'admin' już istnieje")
 
-# Utwórz przykładowego pracownika
-if not User.objects.filter(username='john').exists():
-    user = User.objects.create_user(
-        username='john',
-        email='john@example.com',
-        password='john123'
-    )
-    print("✅ Użytkownik 'john' / 'john123' utworzony")
-else:
-    print("✅ Użytkownik 'john' już istnieje")
+def create_user(username, password, is_superuser=False, is_staff=False, group_name=None, hourly_rate="30.00"):
+    user, created = User.objects.get_or_create(username=username)
 
-# Utwórz przykładowego szefa
-if not User.objects.filter(username='boss').exists():
-    boss = User.objects.create_user(
-        username='boss',
-        email='boss@example.com',
-        password='boss123'
-    )
-    boss.groups.add(manager_group)
-    boss.save()
-    print("✅ Szef 'boss' / 'boss123' utworzony (w grupie Manager)")
-else:
-    print("✅ Szef 'boss' już istnieje")
+    if created:
+        user.set_password(password)
 
-print("\n✅ Baza danych jest gotowa!")
-print("\nDostępni użytkownicy:")
-print("  Admin:     admin / admin123")
-print("  Pracownik: john / john123")
-print("  Szef:      boss / boss123")
+    user.is_superuser = is_superuser
+    user.is_staff = is_staff
+    user.save()
+
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    profile.hourly_rate = hourly_rate
+    profile.save()
+
+    if group_name:
+        group, _ = Group.objects.get_or_create(name=group_name)
+        user.groups.add(group)
+
+
+create_user(
+    username="admin",
+    password=os.environ.get("ADMIN_PASSWORD", "admin12345"),
+    is_superuser=True,
+    is_staff=True,
+)
+
+create_user(
+    username="szef",
+    password=os.environ.get("MANAGER_PASSWORD", "szef12345"),
+    is_staff=True,
+    group_name="Manager",
+    hourly_rate="50.00",
+)
+
+create_user(
+    username="pracownik",
+    password=os.environ.get("EMPLOYEE_PASSWORD", "pracownik12345"),
+    hourly_rate="30.00",
+)
+
+print("Initial users created.")
