@@ -1,4 +1,5 @@
 from django.urls import path
+from django.shortcuts import redirect
 from . import views
 
 urlpatterns = [
@@ -17,7 +18,6 @@ urlpatterns = [
     path("reports/employee/csv/", views.export_employee_report_csv, name="export_employee_report_csv"),
     path("reports/manager/csv/", views.export_manager_report_csv, name="export_manager_report_csv"),
     
-    # stare ścieżki możesz zostawić tymczasowo
-    # path("entries/", views.work_entry_list, name="entries"),
-    # path("entries/new/", views.work_entry_create, name="entry_create"),
-]
+    path("entries/", lambda request: redirect("work_day_list")),
+    path("entries/new/", lambda request: redirect("work_day_create")),
+    ]
